@@ -3,20 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#05080f">
-<meta name="description" content="Tetris completo feito do zero com HTML, CSS e Canvas.">
-<title>Tetris — Neon Edition</title>
+<meta name="theme-color" content="#08070d">
+<meta name="description" content="Tetris Prisma: o clássico com medidor de poderes — Pulso, Laser e Lento. Feito do zero com Canvas.">
+<title>Tetris — Prisma Edition</title>
 <style>
   :root{
-    --bg:#05080f;
-    --panel:rgba(15,23,42,.72);
-    --line:rgba(148,163,184,.14);
-    --text:#e6edf7;
-    --muted:#7f8ea8;
-    --cyan:#5eead4;
-    --violet:#818cf8;
-    --gold:#fbbf24;
-    --radius:16px;
+    --bg:#08070d;
+    --panel:rgba(22,17,34,.72);
+    --line:rgba(196,181,253,.14);
+    --text:#efeaf7;
+    --muted:#8b84a3;
+    --pink:#f0abfc;
+    --magenta:#f472b6;
+    --amber:#fbbf24;
+    --cyan:#22d3ee;
+    --mint:#34d399;
     --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -24,9 +25,9 @@
   body{
     min-height:100dvh;
     background:
-      radial-gradient(1100px 700px at 10% -10%, rgba(56,189,248,.15), transparent 60%),
-      radial-gradient(900px 620px at 92% 0%, rgba(168,85,247,.14), transparent 55%),
-      radial-gradient(800px 600px at 50% 120%, rgba(34,197,94,.08), transparent 60%),
+      radial-gradient(1200px 800px at 85% -10%, rgba(217,70,239,.16), transparent 55%),
+      radial-gradient(1000px 700px at 0% 0%, rgba(56,189,248,.12), transparent 55%),
+      radial-gradient(900px 600px at 50% 120%, rgba(251,146,60,.10), transparent 60%),
       var(--bg);
     color:var(--text);
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -43,12 +44,10 @@
     content:"";
     position:fixed;
     inset:0;
-    background-image:
-      linear-gradient(rgba(148,163,184,.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(148,163,184,.035) 1px, transparent 1px);
-    background-size:42px 42px;
-    -webkit-mask-image:radial-gradient(circle at 50% 28%, #000 0%, transparent 74%);
-    mask-image:radial-gradient(circle at 50% 28%, #000 0%, transparent 74%);
+    background-image:radial-gradient(rgba(196,181,253,.06) 1px, transparent 1.4px);
+    background-size:26px 26px;
+    -webkit-mask-image:radial-gradient(circle at 50% 26%, #000 0%, transparent 72%);
+    mask-image:radial-gradient(circle at 50% 26%, #000 0%, transparent 72%);
     pointer-events:none;
   }
   .app{
@@ -73,19 +72,30 @@
     font-size:clamp(22px,3.4vh,32px);
     font-weight:900;
     line-height:1;
-    letter-spacing:.32em;
-    background:linear-gradient(90deg,#a7f3d0,#67e8f9 38%,#a5b4fc 72%,#f0abfc);
+    letter-spacing:.3em;
+    background:linear-gradient(90deg,#f0abfc,#f472b6 35%,#fbbf24 75%,#fde68a);
     -webkit-background-clip:text;
     background-clip:text;
     color:transparent;
-    filter:drop-shadow(0 0 18px rgba(103,232,249,.25));
+    filter:drop-shadow(0 0 18px rgba(244,114,182,.28));
   }
   .brand p{
     margin-top:6px;
     font-size:10px;
+    font-weight:700;
     letter-spacing:.32em;
     text-transform:uppercase;
     color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .brand p::before{
+    content:"";
+    width:26px;
+    height:3px;
+    border-radius:2px;
+    background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fbbf24);
   }
   .actions{display:flex;gap:8px}
   .icon-btn{
@@ -95,8 +105,8 @@
     padding:8px 12px;
     border:1px solid var(--line);
     border-radius:999px;
-    background:rgba(15,23,42,.6);
-    color:#c7d2e4;
+    background:rgba(22,17,34,.6);
+    color:#d8d0e8;
     font:inherit;
     font-size:12px;
     cursor:pointer;
@@ -104,10 +114,10 @@
     backdrop-filter:blur(10px);
     transition:background .18s ease,border-color .18s ease,color .18s ease,transform .1s ease;
   }
-  .icon-btn:hover{border-color:rgba(94,234,212,.4);color:#fff;background:rgba(30,41,59,.8)}
+  .icon-btn:hover{border-color:rgba(240,171,252,.45);color:#fff;background:rgba(41,31,59,.85)}
   .icon-btn:active{transform:translateY(1px)}
   .icon-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-  .icon-btn.off{color:#64748b;border-color:rgba(148,163,184,.1)}
+  .icon-btn.off{color:#6b6480;border-color:rgba(196,181,253,.1)}
   .icon-btn span{font-size:12px;font-weight:600;letter-spacing:.04em}
 
   /* ---------- layout ---------- */
@@ -124,21 +134,43 @@
     height:clamp(320px,62vh,616px);
     height:clamp(320px,62dvh,616px);
     aspect-ratio:1/2;
-    border-radius:16px;
+    border-radius:14px;
     overflow:hidden;
-    background:#070b14;
+    background:#0d0a16;
     box-shadow:
-      0 0 0 1px rgba(148,163,184,.18),
-      0 0 0 4px rgba(8,13,24,.9),
+      0 0 0 1px rgba(196,181,253,.2),
+      0 0 0 4px rgba(10,8,18,.9),
       0 30px 80px rgba(0,0,0,.7),
-      0 0 70px rgba(56,189,248,.1);
+      0 0 70px rgba(217,70,239,.12);
+  }
+  /* cantos de "mira" do prisma */
+  .board-frame::before,
+  .board-frame::after{
+    content:"";
+    position:absolute;
+    width:22px;
+    height:22px;
+    pointer-events:none;
+    z-index:4;
+  }
+  .board-frame::before{
+    top:6px;left:6px;
+    border-top:2px solid rgba(240,171,252,.8);
+    border-left:2px solid rgba(240,171,252,.8);
+    border-top-left-radius:6px;
+  }
+  .board-frame::after{
+    bottom:6px;right:6px;
+    border-bottom:2px solid rgba(251,191,36,.8);
+    border-right:2px solid rgba(251,191,36,.8);
+    border-bottom-right-radius:6px;
   }
   #board{
     display:block;
     width:100%;
     height:100%;
-    border-radius:15px;
-    background:#070b14;
+    border-radius:14px;
+    background:#0d0a16;
     touch-action:none;
   }
 
@@ -150,7 +182,7 @@
     place-items:center;
     padding:18px;
     text-align:center;
-    background:radial-gradient(circle at 50% 35%, rgba(8,15,30,.55), rgba(3,7,15,.88));
+    background:radial-gradient(circle at 50% 35%, rgba(14,10,24,.55), rgba(6,5,12,.9));
     -webkit-backdrop-filter:blur(6px);
     backdrop-filter:blur(6px);
     opacity:0;
@@ -164,14 +196,14 @@
     flex-direction:column;
     align-items:center;
     gap:10px;
-    max-width:250px;
+    max-width:252px;
   }
   .kicker{
     font-size:9px;
     font-weight:700;
     letter-spacing:.3em;
     text-transform:uppercase;
-    color:var(--cyan);
+    color:var(--pink);
     opacity:.9;
   }
   .overlay h2{
@@ -180,16 +212,17 @@
     line-height:1.05;
     letter-spacing:.1em;
     color:#fff;
-    text-shadow:0 0 32px rgba(94,234,212,.28);
+    text-shadow:0 0 32px rgba(244,114,182,.3);
   }
-  .overlay p{font-size:12px;line-height:1.55;color:#9fb0c9}
+  .overlay p{font-size:12px;line-height:1.55;color:#b0a7c4}
+  .overlay p b{color:#fde68a;font-weight:700}
   .btn-primary{
     margin-top:6px;
     padding:12px 26px;
     border:0;
     border-radius:12px;
-    background:linear-gradient(135deg,#67e8f9,#818cf8);
-    color:#06121f;
+    background:linear-gradient(135deg,#f472b6,#fbbf24);
+    color:#1c0a14;
     font:inherit;
     font-size:13px;
     font-weight:800;
@@ -197,12 +230,12 @@
     text-transform:uppercase;
     white-space:nowrap;
     cursor:pointer;
-    box-shadow:0 10px 30px rgba(103,232,249,.3), inset 0 1px 0 rgba(255,255,255,.5);
+    box-shadow:0 10px 30px rgba(244,114,182,.32), inset 0 1px 0 rgba(255,255,255,.5);
     transition:transform .15s ease,box-shadow .15s ease;
   }
-  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(129,140,248,.42), inset 0 1px 0 rgba(255,255,255,.5)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(251,191,36,.4), inset 0 1px 0 rgba(255,255,255,.5)}
   .btn-primary:active{transform:translateY(1px)}
-  .hint{font-size:10px;letter-spacing:.1em;color:#64748b}
+  .hint{font-size:10px;letter-spacing:.1em;color:#6b6480}
 
   .toast{
     position:absolute;
@@ -210,9 +243,9 @@
     top:38%;
     z-index:2;
     padding:8px 14px;
-    border:1px solid rgba(94,234,212,.35);
+    border:1px solid rgba(244,114,182,.4);
     border-radius:10px;
-    background:rgba(8,15,30,.72);
+    background:rgba(14,10,24,.74);
     color:#fff;
     font-family:var(--mono);
     font-size:clamp(13px,2.2vh,18px);
@@ -223,7 +256,7 @@
     pointer-events:none;
     -webkit-backdrop-filter:blur(4px);
     backdrop-filter:blur(4px);
-    box-shadow:0 0 28px rgba(94,234,212,.25);
+    box-shadow:0 0 28px rgba(244,114,182,.28);
   }
   .toast.show{animation:toastPop .95s ease both}
   @keyframes toastPop{
@@ -241,8 +274,8 @@
     padding:10px 12px;
     border:1px solid var(--line);
     border-radius:14px;
-    background:linear-gradient(180deg, rgba(20,30,50,.78), rgba(10,17,31,.86));
-    box-shadow:0 14px 34px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.04);
+    background:linear-gradient(180deg, rgba(28,21,44,.8), rgba(14,11,24,.88));
+    box-shadow:0 14px 34px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.04);
     -webkit-backdrop-filter:blur(12px);
     backdrop-filter:blur(12px);
   }
@@ -262,7 +295,7 @@
     font-size:clamp(17px,2.2vw,26px);
     font-weight:800;
     line-height:1;
-    background:linear-gradient(180deg,#fff,#8fd8e8);
+    background:linear-gradient(180deg,#fff,#f0abfc);
     -webkit-background-clip:text;
     background-clip:text;
     color:transparent;
@@ -274,7 +307,7 @@
     grid-template-columns:1fr 1fr;
     gap:8px;
     padding-top:8px;
-    border-top:1px solid rgba(148,163,184,.1);
+    border-top:1px solid rgba(196,181,253,.1);
   }
   .stat strong{
     display:block;
@@ -282,7 +315,7 @@
     font-family:var(--mono);
     font-size:15px;
     line-height:1.1;
-    color:#dbeafe;
+    color:#f3e8ff;
   }
   .best{
     display:flex;
@@ -290,14 +323,81 @@
     justify-content:space-between;
     gap:6px;
     padding-top:6px;
-    border-top:1px solid rgba(148,163,184,.1);
+    border-top:1px solid rgba(196,181,253,.1);
     font-size:9px;
     font-weight:600;
     letter-spacing:.14em;
     text-transform:uppercase;
-    color:#64748b;
+    color:#6b6480;
   }
-  .best strong{font-family:var(--mono);font-size:12px;letter-spacing:0;color:var(--gold)}
+  .best strong{font-family:var(--mono);font-size:12px;letter-spacing:0;color:var(--amber)}
+
+  /* poderes */
+  .power-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .slow-badge{
+    font-family:var(--mono);
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.06em;
+    color:#a7f3d0;
+    background:rgba(52,211,153,.12);
+    border:1px solid rgba(52,211,153,.35);
+    border-radius:999px;
+    padding:2px 8px;
+    opacity:0;
+    transition:opacity .2s ease;
+  }
+  .slow-badge.on{opacity:1}
+  .meter{
+    height:8px;
+    margin:8px 0;
+    border-radius:999px;
+    background:rgba(196,181,253,.12);
+    overflow:hidden;
+  }
+  .meter-fill{
+    height:100%;
+    width:0%;
+    border-radius:inherit;
+    background:linear-gradient(90deg,#f472b6,#fbbf24);
+    transition:width .25s ease;
+  }
+  @keyframes meterPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(244,114,182,0)}
+    50%{box-shadow:0 0 20px 3px rgba(244,114,182,.55)}
+  }
+  .power.charged{animation:meterPulse .6s ease 2}
+  .slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .slot{
+    display:grid;
+    place-items:center;
+    aspect-ratio:1.6/1;
+    border:1px dashed rgba(196,181,253,.28);
+    border-radius:10px;
+    background:rgba(3,7,15,.4);
+    color:#4a4360;
+    font-size:17px;
+    transition:border-color .2s ease;
+  }
+  .slot.filled{border-style:solid;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+  .slot[data-type="pulso"]{background:linear-gradient(135deg,#f472b6,#a21caf);border-color:rgba(244,114,182,.6)}
+  .slot[data-type="laser"]{background:linear-gradient(135deg,#22d3ee,#0e7490);border-color:rgba(34,211,238,.6)}
+  .slot[data-type="lento"]{background:linear-gradient(135deg,#34d399,#065f46);border-color:rgba(52,211,153,.6)}
+  .use-hint{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#6b6480}
+  .use-hint kbd{
+    display:inline-grid;
+    place-items:center;
+    min-width:16px;
+    height:16px;
+    padding:0 4px;
+    border:1px solid rgba(196,181,253,.2);
+    border-bottom-width:2px;
+    border-radius:4px;
+    background:rgba(196,181,253,.1);
+    font-family:var(--mono);
+    font-size:9px;
+    color:#e9d5ff;
+  }
 
   .mini-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .mini{padding:8px}
@@ -306,33 +406,33 @@
     width:100%;
     border-radius:8px;
     background:rgba(3,7,15,.45);
-    border:1px solid rgba(148,163,184,.08);
+    border:1px solid rgba(196,181,253,.08);
   }
   #hold{aspect-ratio:1/1}
   #next{aspect-ratio:5/9}
 
   .keys ul{list-style:none;display:flex;flex-direction:column;gap:5px;margin-top:2px}
-  .keys li{display:flex;align-items:center;gap:4px;font-size:10px;color:#94a3b8}
+  .keys li{display:flex;align-items:center;gap:4px;font-size:10px;color:#a79fc0}
   .keys kbd{
     display:inline-grid;
     place-items:center;
     min-width:17px;
     height:17px;
     padding:0 4px;
-    border:1px solid rgba(148,163,184,.16);
+    border:1px solid rgba(196,181,253,.18);
     border-bottom-width:2px;
     border-radius:4px;
-    background:rgba(148,163,184,.1);
+    background:rgba(196,181,253,.1);
     font-family:var(--mono);
     font-size:9px;
-    color:#cbd5e1;
+    color:#e9d5ff;
   }
-  .keys li span{margin-left:auto;color:#64748b;font-size:9px}
+  .keys li span{margin-left:auto;color:#6b6480;font-size:9px}
 
   /* ---------- controles de toque ---------- */
   .touch{
     display:none;
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(4,1fr);
     gap:8px;
     width:100%;
     max-width:460px;
@@ -346,8 +446,8 @@
     height:46px;
     border:1px solid var(--line);
     border-radius:12px;
-    background:linear-gradient(180deg,rgba(30,41,59,.9),rgba(15,23,42,.9));
-    color:#cbd5e1;
+    background:linear-gradient(180deg,rgba(41,31,59,.9),rgba(22,17,34,.9));
+    color:#e2d9f3;
     font:inherit;
     font-size:16px;
     font-weight:700;
@@ -358,12 +458,19 @@
   }
   .touch button.active{
     transform:scale(.96);
-    background:rgba(94,234,212,.16);
-    border-color:rgba(94,234,212,.45);
+    background:rgba(240,171,252,.16);
+    border-color:rgba(240,171,252,.5);
     color:#fff;
   }
-  .touch [data-act="hold"]{font-size:10px;letter-spacing:.16em}
-  .touch [data-act="hard"]{font-size:10px;letter-spacing:.16em}
+  .touch [data-act="hold"],
+  .touch [data-act="power"]{font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+  .touch [data-act="hard"]{grid-column:span 2;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+  .touch [data-act="power"].ready{
+    background:linear-gradient(135deg,rgba(244,114,182,.35),rgba(251,191,36,.3));
+    border-color:rgba(244,114,182,.65);
+    color:#fff;
+    box-shadow:0 0 16px rgba(244,114,182,.35);
+  }
 
   .footer{
     text-align:center;
@@ -371,7 +478,7 @@
     font-weight:600;
     letter-spacing:.16em;
     text-transform:uppercase;
-    color:#334155;
+    color:#3d3652;
   }
 
   /* ---------- responsivo ---------- */
@@ -399,10 +506,12 @@
     .stat strong{font-size:12px}
     .best{padding-top:5px;font-size:8px}
     .best strong{font-size:10px}
+    .meter{margin:6px 0}
+    .use-hint{display:none}
     .mini-row{grid-template-columns:1fr;gap:8px}
     .mini{padding:6px}
     .overlay{padding:12px}
-    .overlay-inner{max-width:200px;gap:8px}
+    .overlay-inner{max-width:204px;gap:8px}
     .overlay h2{font-size:25px}
     .overlay p{font-size:11px}
     .btn-primary{padding:10px 18px;font-size:11px;margin-top:2px}
@@ -427,7 +536,7 @@
   <header class="topbar">
     <div class="brand">
       <h1>TETRIS</h1>
-      <p>Neon Edition</p>
+      <p>Prisma Edition</p>
     </div>
     <div class="actions">
       <button id="soundBtn" class="icon-btn" type="button" aria-pressed="true" title="Ligar ou desligar o som">♪ <span>Som</span></button>
@@ -438,13 +547,13 @@
   <main class="game">
     <section class="board-panel">
       <div class="board-frame">
-        <canvas id="board" aria-label="Tabuleiro do Tetris"></canvas>
+        <canvas id="board" aria-label="Tabuleiro do Tetris Prisma"></canvas>
         <div id="toast" class="toast" aria-hidden="true"></div>
         <div id="overlay" class="overlay">
           <div class="overlay-inner">
             <span id="ovKicker" class="kicker">Pronto?</span>
             <h2 id="ovTitle">TETRIS</h2>
-            <p id="ovText">Empilhe as peças, complete linhas e não deixe a pilha chegar ao topo.</p>
+            <p id="ovText">Complete linhas para encher o medidor do prisma e ganhar poderes: <b>💥 Pulso</b>, <b>🔦 Laser</b> e <b>🐢 Lento</b>.</p>
             <button id="ovBtn" class="btn-primary" type="button">Jogar</button>
             <span id="ovHint" class="hint">Enter para começar</span>
           </div>
@@ -463,6 +572,19 @@
           <div class="stat"><span class="label">Linhas</span><strong id="lines">0</strong></div>
         </div>
         <div class="best"><span>Recorde</span><strong id="best">0</strong></div>
+      </div>
+
+      <div class="card power" id="powerCard">
+        <div class="power-head">
+          <span class="label">Poderes</span>
+          <span id="slowBadge" class="slow-badge">🐢 15s</span>
+        </div>
+        <div class="meter" aria-hidden="true"><div id="meterFill" class="meter-fill"></div></div>
+        <div class="slots">
+          <div id="slot0" class="slot" data-type="">·</div>
+          <div id="slot1" class="slot" data-type="">·</div>
+        </div>
+        <span class="use-hint">usar <kbd>E</kbd></span>
       </div>
 
       <div class="mini-row">
@@ -485,6 +607,7 @@
           <li><kbd>Z</kbd><span>girar anti-horário</span></li>
           <li><kbd>Espaço</kbd><span>queda rápida</span></li>
           <li><kbd>C</kbd><span>reservar peça</span></li>
+          <li><kbd>E</kbd><span>usar poder</span></li>
           <li><kbd>P</kbd><span>pausar</span></li>
           <li><kbd>R</kbd><span>reiniciar</span></li>
         </ul>
@@ -497,11 +620,12 @@
     <button type="button" data-act="rotate" aria-label="Girar peça">⟳</button>
     <button type="button" data-act="right" aria-label="Mover para a direita">▶</button>
     <button type="button" data-act="hold">Reservar</button>
+    <button type="button" data-act="power" aria-label="Usar poder">💥</button>
     <button type="button" data-act="down" aria-label="Descer">▼</button>
     <button type="button" data-act="hard">Queda</button>
   </div>
 
-  <p class="footer">Feito do zero com Canvas · sem bibliotecas</p>
+  <p class="footer">Feito do zero com Canvas · poderes de prisma</p>
 </div>
 
 <script>
@@ -529,26 +653,43 @@
   };
   const COLORS = {
     I: '#22d3ee',
-    J: '#3b82f6',
+    J: '#818cf8',
     L: '#fb923c',
     O: '#facc15',
-    S: '#4ade80',
+    S: '#34d399',
     T: '#c084fc',
-    Z: '#f87171'
+    Z: '#fb7185'
   };
   const KICKS = [
     [0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0],
     [0, -1], [-1, -1], [1, -1], [-2, -1], [2, -1]
   ];
   const LINE_SCORE = [0, 100, 300, 500, 800];
+
+  /* poderes */
+  const POWERS = {
+    pulso: { icon: '💥', name: 'Pulso' },
+    laser: { icon: '🔦', name: 'Laser' },
+    lento: { icon: '🐢', name: 'Lento' }
+  };
+  const POWER_TYPES = Object.keys(POWERS);
+  const CHARGE_NEED = 6;      // linhas para carregar 1 poder
+  const MAX_POWERS = 2;       // slots
+  const SLOW_FACTOR = 0.3;    // gravidade em 30%
+  const SLOW_MS = 15000;      // duração do lento
+  const PULSE_RADIUS = 2;     // pulso: janela 5x5
+  const PULSE_POINTS = 15;    // pontos por bloco destruído, x nível
+  const LASER_POINTS = 100;   // pontos fixos do laser, x nível
+  const OVERFLOW_POINTS = 300; // bônus quando slots cheios
+
   const CLEAR_TIME = 240;
   const LOCK_DELAY = 480;
   const MAX_RESETS = 15;
   const DAS = 150;
   const ARR = 42;
   const SOFT_INTERVAL = 45;
-  const BEST_KEY = 'tetris-neon-best';
-  const SOUND_KEY = 'tetris-neon-sound';
+  const BEST_KEY = 'tetris-prisma-best';
+  const SOUND_KEY = 'tetris-prisma-sound';
 
   /* =========================================================
      DOM
@@ -571,7 +712,11 @@
     soundBtn: $('#soundBtn'),
     pauseBtn: $('#pauseBtn'),
     touch: $('#touch'),
-    toast: $('#toast')
+    toast: $('#toast'),
+    powerCard: $('#powerCard'),
+    meterFill: $('#meterFill'),
+    slowBadge: $('#slowBadge'),
+    slots: [$('#slot0'), $('#slot1')]
   };
 
   /* =========================================================
@@ -592,6 +737,13 @@
   let best = 0;
   let combo = -1;
 
+  /* poderes */
+  let charge = 0;
+  let powers = [];
+  let slowUntil = 0;
+  let lastSlowShown = -1;
+  let cardTimer = null;
+
   let dropInterval = 800;
   let dropAcc = 0;
   let lockTimer = 0;
@@ -601,6 +753,12 @@
   let dir = 0;
   let dasTimer = 0;
   let dasCharged = false;
+
+  /* efeitos */
+  const particles = [];
+  let shakeT = 0;
+  let shakeAmp = 0;
+  let flash = 0;
 
   let hudDirty = true;
   let soundOn = true;
@@ -689,6 +847,10 @@
     return out;
   }
 
+  function boardIsEmpty() {
+    return board.every(row => row.every(cell => !cell));
+  }
+
   /* =========================================================
      Áudio (WebAudio, sem arquivos externos)
      ========================================================= */
@@ -730,6 +892,33 @@
     }
   }
 
+  function noiseBurst(dur = 0.28, vol = 0.14, cutoff = 900) {
+    if (!soundOn) return;
+    const ac = ensureAudio();
+    if (!ac) return;
+    try {
+      const len = Math.max(1, Math.floor(ac.sampleRate * dur));
+      const buffer = ac.createBuffer(1, len, ac.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < len; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+      }
+      const src = ac.createBufferSource();
+      src.buffer = buffer;
+      const filter = ac.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = cutoff;
+      const gain = ac.createGain();
+      gain.gain.value = vol;
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(ac.destination);
+      src.start();
+    } catch (err) {
+      /* opcional */
+    }
+  }
+
   function sfxMove() {
     const now = performance.now();
     if (now - lastMoveSound < 35) return;
@@ -746,8 +935,25 @@
       tone(notes[i], 0.09, 'triangle', 0.04, i * 0.055);
     }
   }
+  function sfxCharge() {
+    tone(660, 0.07, 'triangle', 0.035);
+    tone(880, 0.07, 'triangle', 0.035, 0.08);
+    tone(1174, 0.12, 'triangle', 0.04, 0.16);
+  }
   function sfxPerfect() {
     [1046.5, 1318.5, 1568, 2093].forEach((f, i) => tone(f, 0.12, 'triangle', 0.035, i * 0.07));
+  }
+  function sfxPulse() {
+    noiseBurst(0.3, 0.16, 800);
+    tone(160, 0.3, 'sawtooth', 0.05, 0, 40);
+  }
+  function sfxLaser() {
+    tone(1500, 0.16, 'sawtooth', 0.035, 0, 180);
+    tone(2200, 0.1, 'square', 0.02, 0.02, 400);
+  }
+  function sfxSlow() {
+    tone(420, 0.35, 'sine', 0.035, 0, 180);
+    tone(210, 0.45, 'sine', 0.03, 0.1, 105);
   }
   function sfxLevelUp() {
     [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, 0.1, 'square', 0.022, i * 0.06));
@@ -762,6 +968,180 @@
     tone(330, 0.28, 'sawtooth', 0.035, 0, 220);
     tone(220, 0.4, 'sawtooth', 0.035, 0.26, 110);
     tone(110, 0.6, 'sine', 0.045, 0.55, 55);
+  }
+
+  /* =========================================================
+     Efeitos: partículas, shake, flash
+     ========================================================= */
+  function spawnBurst(px, py, color, count = 3, speed = 1) {
+    for (let i = 0; i < count; i++) {
+      if (particles.length > 380) particles.shift();
+      const angle = Math.random() * Math.PI * 2;
+      const v = (60 + Math.random() * 160) * speed;
+      particles.push({
+        x: px,
+        y: py,
+        vx: Math.cos(angle) * v,
+        vy: Math.sin(angle) * v - 70,
+        life: 380 + Math.random() * 320,
+        max: 0,
+        size: 2 + Math.random() * 3,
+        color
+      });
+      particles[particles.length - 1].max = particles[particles.length - 1].life;
+    }
+  }
+
+  function updateParticles(dt) {
+    const g = 520;
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.life -= dt;
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+        continue;
+      }
+      p.vy += g * (dt / 1000);
+      p.x += p.vx * (dt / 1000);
+      p.y += p.vy * (dt / 1000);
+    }
+    if (shakeT > 0) shakeT -= dt;
+    if (flash > 0) flash = Math.max(0, flash - dt / 260);
+  }
+
+  function addShake(amp, dur) {
+    shakeAmp = Math.max(shakeAmp, amp);
+    shakeT = Math.max(shakeT, dur);
+  }
+
+  /* =========================================================
+     Poderes
+     ========================================================= */
+  function slowActive() {
+    return performance.now() < slowUntil;
+  }
+
+  function addCharge(n) {
+    if (n <= 0) return;
+    charge += n;
+    while (charge >= CHARGE_NEED) {
+      charge -= CHARGE_NEED;
+      if (powers.length < MAX_POWERS) {
+        const type = POWER_TYPES[Math.floor(Math.random() * POWER_TYPES.length)];
+        powers.push(type);
+        showToast('NOVO PODER: ' + POWERS[type].name.toUpperCase());
+        sfxCharge();
+        els.powerCard.classList.remove('charged');
+        void els.powerCard.offsetWidth;
+        els.powerCard.classList.add('charged');
+        clearTimeout(cardTimer);
+        cardTimer = setTimeout(() => els.powerCard.classList.remove('charged'), 1300);
+      } else {
+        addScore(OVERFLOW_POINTS * level);
+        showToast('PRISMA CHEIO +' + fmt(OVERFLOW_POINTS * level));
+        sfxCharge();
+      }
+    }
+    hudDirty = true;
+  }
+
+  /* 💥 Pulso: destrói a janela 5x5 mais densa da pilha */
+  function applyPulse() {
+    if (boardIsEmpty()) return false;
+
+    let bestCount = -1;
+    let cx = 0, cy = 0;
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (!board[y][x]) continue;
+        let count = 0;
+        for (let dy = -PULSE_RADIUS; dy <= PULSE_RADIUS; dy++) {
+          for (let dx = -PULSE_RADIUS; dx <= PULSE_RADIUS; dx++) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue;
+            if (board[ny][nx]) count++;
+          }
+        }
+        if (count > bestCount || (count === bestCount && y > cy)) {
+          bestCount = count;
+          cx = x;
+          cy = y;
+        }
+      }
+    }
+    if (bestCount <= 0) return false;
+
+    let removed = 0;
+    for (let dy = -PULSE_RADIUS; dy <= PULSE_RADIUS; dy++) {
+      for (let dx = -PULSE_RADIUS; dx <= PULSE_RADIUS; dx++) {
+        const nx = cx + dx;
+        const ny = cy + dy;
+        if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue;
+        const type = board[ny][nx];
+        if (!type) continue;
+        board[ny][nx] = null;
+        removed++;
+        spawnBurst(nx * CELL + CELL / 2, ny * CELL + CELL / 2, Math.random() < 0.4 ? '#fbbf24' : COLORS[type], 2, 1.2);
+      }
+    }
+    addScore(removed * PULSE_POINTS * level);
+    addShake(9, 280);
+    flash = 0.85;
+    sfxPulse();
+    showToast('PULSO! +' + fmt(removed * PULSE_POINTS * level));
+    return true;
+  }
+
+  /* 🔦 Laser: apaga a fileira mais cheia (conta pontos, não conta linha) */
+  function applyLaser() {
+    let targetY = -1;
+    let targetCount = 0;
+    for (let y = 0; y < ROWS; y++) {
+      let count = 0;
+      for (let x = 0; x < COLS; x++) {
+        if (board[y][x]) count++;
+      }
+      if (count > targetCount) {
+        targetCount = count;
+        targetY = y;
+      }
+    }
+    if (targetY < 0) return false;
+
+    for (let x = 0; x < COLS; x++) {
+      const type = board[targetY][x];
+      if (type) spawnBurst(x * CELL + CELL / 2, targetY * CELL + CELL / 2, Math.random() < 0.5 ? '#22d3ee' : COLORS[type], 2, 0.9);
+    }
+    board.splice(targetY, 1);
+    board.unshift(Array(COLS).fill(null));
+    addScore(LASER_POINTS * level);
+    addShake(4, 160);
+    sfxLaser();
+    showToast('LASER! +' + fmt(LASER_POINTS * level));
+    return true;
+  }
+
+  function usePower() {
+    if (state !== 'playing' || clearing || powers.length === 0) return;
+    const type = powers[0];
+    let used = false;
+
+    if (type === 'pulso') used = applyPulse();
+    else if (type === 'laser') used = applyLaser();
+    else if (type === 'lento') {
+      slowUntil = performance.now() + SLOW_MS;
+      used = true;
+      sfxSlow();
+      showToast('LENTO! GRAVIDADE 30%');
+    }
+
+    if (!used) {
+      showToast('SEM ALVO');
+      return;
+    }
+    powers.shift();
+    hudDirty = true;
   }
 
   /* =========================================================
@@ -819,8 +1199,8 @@
     const alpha = opts.alpha == null ? 1 : opts.alpha;
     const glow = !!opts.glow;
     const ghost = !!opts.ghost;
-    const pad = Math.max(1, size * 0.05);
-    const radius = Math.max(2, size * 0.16);
+    const pad = Math.max(1, size * 0.06);
+    const radius = Math.max(2, size * 0.12);
     const inner = size - pad * 2;
 
     ctx.save();
@@ -828,7 +1208,7 @@
 
     if (ghost) {
       ctx.fillStyle = color;
-      ctx.globalAlpha = alpha * 0.1;
+      ctx.globalAlpha = alpha * 0.09;
       roundRect(ctx, x + pad, y + pad, inner, inner, radius);
       ctx.fill();
       ctx.globalAlpha = alpha * 0.55;
@@ -841,27 +1221,27 @@
     }
 
     const grad = ctx.createLinearGradient(x, y, x + size, y + size);
-    grad.addColorStop(0, shade(color, 32));
+    grad.addColorStop(0, shade(color, 34));
     grad.addColorStop(0.55, color);
-    grad.addColorStop(1, shade(color, -28));
+    grad.addColorStop(1, shade(color, -30));
 
     if (glow) {
       ctx.shadowColor = color;
-      ctx.shadowBlur = size * 0.38;
+      ctx.shadowBlur = size * 0.4;
     }
     ctx.fillStyle = grad;
     roundRect(ctx, x + pad, y + pad, inner, inner, radius);
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    const hi = ctx.createLinearGradient(x, y + pad, x, y + pad + inner * 0.5);
-    hi.addColorStop(0, 'rgba(255,255,255,.42)');
+    const hi = ctx.createLinearGradient(x, y + pad, x, y + pad + inner * 0.42);
+    hi.addColorStop(0, 'rgba(255,255,255,.46)');
     hi.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = hi;
-    roundRect(ctx, x + pad + 1, y + pad + 1, inner - 2, inner * 0.5, radius * 0.8);
+    roundRect(ctx, x + pad + 1, y + pad + 1, inner - 2, inner * 0.42, radius * 0.8);
     ctx.fill();
 
-    ctx.strokeStyle = 'rgba(2,6,23,.38)';
+    ctx.strokeStyle = 'rgba(4,2,10,.4)';
     ctx.lineWidth = Math.max(1, size * 0.04);
     roundRect(ctx, x + pad, y + pad, inner, inner, radius);
     ctx.stroke();
@@ -871,21 +1251,28 @@
 
   function renderBoard() {
     const ctx = fit(els.board, W, H);
+    ctx.save();
+
+    /* shake */
+    if (shakeT > 0 && shakeAmp > 0) {
+      const decay = shakeT / 300;
+      const amp = shakeAmp * Math.max(0.2, decay);
+      ctx.translate((Math.random() * 2 - 1) * amp, (Math.random() * 2 - 1) * amp);
+    }
 
     const bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, '#0b1224');
-    bg.addColorStop(1, '#070b14');
+    bg.addColorStop(0, '#141021');
+    bg.addColorStop(1, '#0b0a14');
     ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(-20, -20, W + 40, H + 40);
 
     const topGlow = ctx.createRadialGradient(W / 2, -50, 8, W / 2, -50, 340);
-    topGlow.addColorStop(0, 'rgba(94,234,212,.11)');
-    topGlow.addColorStop(1, 'rgba(94,234,212,0)');
+    topGlow.addColorStop(0, 'rgba(244,114,182,.12)');
+    topGlow.addColorStop(1, 'rgba(244,114,182,0)');
     ctx.fillStyle = topGlow;
-    ctx.fillRect(0, 0, W, H * 0.6);
+    ctx.fillRect(-20, -20, W + 40, H * 0.6);
 
-    ctx.save();
-    ctx.strokeStyle = 'rgba(148,163,184,.06)';
+    ctx.strokeStyle = 'rgba(196,181,253,.06)';
     ctx.lineWidth = 1;
     for (let x = 1; x < COLS; x++) {
       ctx.beginPath();
@@ -899,7 +1286,6 @@
       ctx.lineTo(W, y * CELL + 0.5);
       ctx.stroke();
     }
-    ctx.restore();
 
     /* aviso de altura */
     if (state === 'playing') {
@@ -909,8 +1295,8 @@
       }
       if (top <= 4) {
         const danger = ctx.createLinearGradient(0, 0, 0, CELL * 4);
-        danger.addColorStop(0, 'rgba(248,113,113,' + (0.1 + (4 - top) * 0.03) + ')');
-        danger.addColorStop(1, 'rgba(248,113,113,0)');
+        danger.addColorStop(0, 'rgba(251,113,133,' + (0.1 + (4 - top) * 0.03) + ')');
+        danger.addColorStop(1, 'rgba(251,113,133,0)');
         ctx.fillStyle = danger;
         ctx.fillRect(0, 0, W, CELL * 4);
       }
@@ -932,11 +1318,23 @@
       ctx.globalCompositeOperation = 'lighter';
       for (const y of clearing.rows) {
         const rowGrad = ctx.createLinearGradient(0, y * CELL, W, y * CELL + CELL);
-        rowGrad.addColorStop(0, 'rgba(255,255,255,' + alpha * 0.16 + ')');
+        rowGrad.addColorStop(0, 'rgba(255,214,236,' + alpha * 0.16 + ')');
         rowGrad.addColorStop(0.5, 'rgba(255,255,255,' + alpha + ')');
-        rowGrad.addColorStop(1, 'rgba(255,255,255,' + alpha * 0.16 + ')');
+        rowGrad.addColorStop(1, 'rgba(255,214,236,' + alpha * 0.16 + ')');
         ctx.fillStyle = rowGrad;
         ctx.fillRect(0, y * CELL, W, CELL);
+      }
+      ctx.restore();
+    }
+
+    /* partículas */
+    if (particles.length > 0) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (const p of particles) {
+        ctx.globalAlpha = Math.max(0, Math.min(1, p.life / p.max)) * 0.9;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
       }
       ctx.restore();
     }
@@ -966,6 +1364,14 @@
         }
       }
     }
+
+    /* flash global (explosões) */
+    if (flash > 0) {
+      ctx.fillStyle = 'rgba(255,240,250,' + flash * 0.32 + ')';
+      ctx.fillRect(-20, -20, W + 40, H + 40);
+    }
+
+    ctx.restore();
   }
 
   function renderMini(canvas, logicalW, logicalH, types, cellSize, slots) {
@@ -974,7 +1380,7 @@
 
     if (slots > 1) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(148,163,184,.09)';
+      ctx.strokeStyle = 'rgba(196,181,253,.09)';
       ctx.lineWidth = 1;
       const slotH = logicalH / slots;
       for (let i = 1; i < slots; i++) {
@@ -1006,10 +1412,26 @@
     });
   }
 
+  function renderSlowBadge() {
+    const remaining = slowUntil - performance.now();
+    if (remaining > 0 && state === 'playing') {
+      const seconds = Math.ceil(remaining / 1000);
+      if (seconds !== lastSlowShown) {
+        els.slowBadge.textContent = '🐢 ' + seconds + 's';
+        lastSlowShown = seconds;
+      }
+      els.slowBadge.classList.add('on');
+    } else if (lastSlowShown !== -1) {
+      els.slowBadge.classList.remove('on');
+      lastSlowShown = -1;
+    }
+  }
+
   function renderAll() {
     renderBoard();
     renderMini(els.hold, 100, 100, holdType ? [holdType] : [], 18, 1);
     renderMini(els.next, 100, 180, queue.slice(0, 3), 14, 3);
+    renderSlowBadge();
     if (hudDirty) updateHud();
   }
 
@@ -1021,6 +1443,26 @@
     els.level.textContent = String(level);
     els.lines.textContent = String(lines);
     els.best.textContent = fmt(best);
+    els.meterFill.style.width = Math.min(100, (charge / CHARGE_NEED) * 100) + '%';
+
+    els.slots.forEach((slot, index) => {
+      const type = powers[index];
+      if (type) {
+        slot.textContent = POWERS[type].icon;
+        slot.dataset.type = type;
+        slot.classList.add('filled');
+        slot.title = POWERS[type].name;
+      } else {
+        slot.textContent = '·';
+        slot.dataset.type = '';
+        slot.classList.remove('filled');
+        slot.title = '';
+      }
+    });
+
+    const powerBtn = els.touch.querySelector('[data-act="power"]');
+    if (powerBtn) powerBtn.classList.toggle('ready', powers.length > 0);
+
     hudDirty = false;
   }
 
@@ -1037,7 +1479,7 @@
   function showOverlay(kicker, title, text, buttonLabel, hint) {
     els.ovKicker.textContent = kicker;
     els.ovTitle.textContent = title;
-    els.ovText.textContent = text;
+    els.ovText.innerHTML = text;
     els.ovBtn.textContent = buttonLabel;
     els.ovHint.textContent = hint;
     els.overlay.classList.add('show');
@@ -1072,6 +1514,10 @@
     lines = 0;
     level = 1;
     combo = -1;
+    charge = 0;
+    powers = [];
+    slowUntil = 0;
+    lastSlowShown = -1;
     dropInterval = 800;
     dropAcc = 0;
     lockTimer = 0;
@@ -1081,6 +1527,9 @@
     dir = 0;
     dasTimer = 0;
     dasCharged = false;
+    particles.length = 0;
+    shakeT = 0;
+    flash = 0;
     state = 'ready';
     hudDirty = true;
     updateHud();
@@ -1088,7 +1537,7 @@
     showOverlay(
       'Pronto?',
       'TETRIS',
-      'Mova, gire e encaixe as peças. Complete linhas e sobreviva o máximo que puder.',
+      'Complete linhas para encher o medidor do prisma e ganhar poderes: <b>💥 Pulso</b>, <b>🔦 Laser</b> e <b>🐢 Lento</b>.',
       'Jogar',
       'Enter para começar'
     );
@@ -1107,6 +1556,10 @@
     lines = 0;
     level = 1;
     combo = -1;
+    charge = 0;
+    powers = [];
+    slowUntil = 0;
+    lastSlowShown = -1;
     dropInterval = 800;
     dropAcc = 0;
     lockTimer = 0;
@@ -1116,6 +1569,9 @@
     dir = 0;
     dasTimer = 0;
     dasCharged = false;
+    particles.length = 0;
+    shakeT = 0;
+    flash = 0;
     state = 'playing';
     hideOverlay();
     syncButtons();
@@ -1159,10 +1615,11 @@
     hudDirty = true;
     syncButtons();
     const plural = lines === 1 ? 'linha' : 'linhas';
+    const usedPowers = powers.length === 0 ? '' : ' Ainda havia ' + (powers.length === 1 ? '1 poder' : powers.length + ' poderes') + ' guardado.';
     showOverlay(
       'Fim de jogo',
       'GAME OVER',
-      'Você fez ' + fmt(score) + ' pontos e limpou ' + lines + ' ' + plural + ' no nível ' + level + '.',
+      'Você fez ' + fmt(score) + ' pontos e limpou ' + lines + ' ' + plural + ' no nível ' + level + '.' + usedPowers,
       'Recomeçar',
       'Enter para recomeçar'
     );
@@ -1267,6 +1724,19 @@
       distance++;
     }
     if (distance) addScore(distance * 2);
+    /* poeira de impacto */
+    for (let c = 0; c < piece.m[0].length; c++) {
+      for (let r = piece.m.length - 1; r >= 0; r--) {
+        if (piece.m[r][c]) {
+          const py = piece.y + r;
+          if (py >= 0) {
+            spawnBurst((piece.x + c) * CELL + CELL / 2, py * CELL + CELL, 'rgba(255,255,255,1)', 1, 0.35);
+          }
+          break;
+        }
+      }
+    }
+    addShake(3, 120);
     lockPiece();
     sfxDrop();
   }
@@ -1317,6 +1787,16 @@
       clearing = { rows: fullRows, t: 0 };
       combo++;
       const n = fullRows.length;
+
+      /* partículas da linha limpa */
+      for (const rowY of fullRows) {
+        for (let x = 0; x < COLS; x++) {
+          const type = board[rowY][x];
+          if (type) spawnBurst(x * CELL + CELL / 2, rowY * CELL + CELL / 2, COLORS[type], 2, 0.8);
+        }
+      }
+      if (n >= 3) addShake(5, 200);
+
       if (n >= 2 || combo > 0) {
         const names = { 2: 'DUPLA', 3: 'TRIPLA', 4: 'TETRIS!' };
         let message = names[n] || '';
@@ -1325,6 +1805,7 @@
         }
         showToast(message);
       }
+      addCharge(n);
       sfxClear(n);
     } else {
       combo = -1;
@@ -1347,11 +1828,12 @@
     let gained = LINE_SCORE[n] * level;
     if (combo > 0) gained += 50 * combo * level;
 
-    const perfect = board.every(row => row.every(cell => !cell));
+    const perfect = boardIsEmpty();
     if (perfect) {
       gained += 1000 * level;
       showToast('PERFEITO!');
       sfxPerfect();
+      flash = Math.max(flash, 0.7);
     }
     addScore(gained);
 
@@ -1368,6 +1850,8 @@
      Loop principal
      ========================================================= */
   function update(dt) {
+    updateParticles(dt);
+
     if (state !== 'playing') return;
 
     if (clearing) {
@@ -1401,7 +1885,8 @@
     }
 
     dropAcc += dt;
-    const interval = softDropping ? Math.min(SOFT_INTERVAL, dropInterval) : dropInterval;
+    const effective = slowActive() ? dropInterval / SLOW_FACTOR : dropInterval;
+    const interval = softDropping ? Math.min(SOFT_INTERVAL, effective) : effective;
     let guard = 0;
 
     while (dropAcc >= interval && guard++ < 30) {
@@ -1505,6 +1990,10 @@
       case 'Shift':
         if (!event.repeat) holdPiece();
         break;
+      case 'e':
+      case 'E':
+        if (!event.repeat) usePower();
+        break;
       default:
         break;
     }
@@ -1574,6 +2063,7 @@
       else if (action === 'rotate') rotate(1);
       else if (action === 'hard') hardDrop();
       else if (action === 'hold') holdPiece();
+      else if (action === 'power') usePower();
 
       button.blur();
     };
